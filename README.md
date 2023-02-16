@@ -2,6 +2,10 @@
 
 This is the Backend part of a full stack project focused on food lifestyle.
 
+Below is the link for the FE side of the project
+
+[FOOD_APP_FRONTEND](https://github.com/AndyCotruta/EPICODE-CAPSTONE-FE)
+
 The REST APIs contain users, recipes, food categories, featured categories, restaurants and restaurants reviews.
 
 ## API Reference
@@ -474,3 +478,7 @@ Section reserved only for users with **role** 'admin' allows you to perform CRUD
 | :-------- | :------- | :--------------------------------------------- |
 | `id`      | `string` | **Required**. Id of featuredCategory to delete |
 | `api_key` | `string` | **Required**. Your API key                     |
+
+## Authors
+
+- [@andyaristidecotruta](https://www.linkedin.com/in/andy-aristide-cotruta-03b7a4136/)
