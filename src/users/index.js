@@ -38,16 +38,28 @@ usersRouter.put(
   cloudinaryUser,
   async (req, res, next) => {
     try {
-      const url = req.file.path;
-      const updatedUser = await UsersModel.findByIdAndUpdate(
-        req.user._id,
-        { ...req.body, avatar: url },
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
-      res.send(updatedUser);
+      if (req.file !== undefined) {
+        const url = req.file.path;
+        const updatedUser = await UsersModel.findByIdAndUpdate(
+          req.user._id,
+          { ...req.body, avatar: url },
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
+        res.send(updatedUser);
+      } else {
+        const updatedUser = await UsersModel.findByIdAndUpdate(
+          req.user._id,
+          req.body,
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
+        res.send(updatedUser);
+      }
     } catch (error) {
       next(error);
     }
