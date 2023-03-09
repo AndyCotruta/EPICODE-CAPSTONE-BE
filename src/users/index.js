@@ -38,11 +38,25 @@ usersRouter.put(
   cloudinaryUser,
   async (req, res, next) => {
     try {
+      console.log(req.file);
       if (req.file !== undefined) {
         const url = req.file.path;
         const updatedUser = await UsersModel.findByIdAndUpdate(
           req.user._id,
           { ...req.body, avatar: url },
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
+        res.send(updatedUser);
+      } else if (
+        typeof req.body.userImage === "string" &&
+        req.body.userImage !== undefined
+      ) {
+        const updatedUser = await UsersModel.findByIdAndUpdate(
+          req.user._id,
+          { ...req.body, avatar: req.body.userImage },
           {
             new: true,
             runValidators: true,
