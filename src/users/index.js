@@ -1,5 +1,6 @@
 import express from "express";
 import UsersModel from "./model.js";
+import OrdersModel from "../orders/model.js";
 import passport from "passport";
 import { adminOnlyMiddleware } from "../lib/middlewares/adminOnly.js";
 import { createAccessToken } from "../lib/auth/authTools.js";
@@ -25,7 +26,10 @@ const usersRouter = express.Router(); //declaring the Router that connects our o
 
 usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const user = await UsersModel.findById(req.user._id);
+    const user = await UsersModel.findById(req.user._id)
+      .populate("activeOrder")
+      .populate("orderHistory");
+
     res.send(user);
   } catch (error) {
     next(error);
@@ -88,6 +92,86 @@ usersRouter.delete("/me", JWTAuthMiddleware, async (req, res, next) => {
     next(error);
   }
 });
+
+usersRouter.post(
+  "/me/activeOrder",
+  JWTAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const newOrder = new OrdersModel({ ...req.body, userId: req.user._id });
+      const { _id } = await newOrder.save();
+      const updatedUser = await UsersModel.findByIdAndUpdate(
+        req.user._id,
+        { activeOrder: _id },
+        { new: true, runValidators: true }
+      );
+      if (updatedUser) {
+        res.send(updatedUser);
+      } else {
+        next(
+          createHttpError(404, `User with id ${req.user._id} was not found`)
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+usersRouter.post(
+  "/me/orderHistory",
+  JWTAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const user = await UsersModel.findById(req.user._id);
+      const deliveredOrder = await OrdersModel.findByIdAndUpdate(
+        req.body.orderId,
+        { status: "delivered" },
+        { new: true, runValidators: true }
+      );
+      if (deliveredOrder) {
+        if (
+          user.activeOrder !== null &&
+          req.body.orderId === user.activeOrder._id.toString()
+        ) {
+          const updatedUser = await UsersModel.findByIdAndUpdate(
+            req.user._id,
+            {
+              $push: { orderHistory: req.body.orderId },
+              activeOrder: null,
+            },
+            { new: true, runValidators: true }
+          );
+          if (updatedUser) {
+            res.send(updatedUser);
+          } else {
+            next(
+              createHttpError(404, `User with id ${req.user._id} was not found`)
+            );
+          }
+        } else {
+          next(
+            createHttpError(
+              403,
+              `You cannot move the order ${req.body.orderId} because it is already in the orderHistory collection`
+            )
+          );
+        }
+      } else {
+        next(
+          createHttpError(
+            404,
+            `Order with id ${req.body.orderId} was not found`
+          )
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
 
 //.......................................... Google Login................................
 

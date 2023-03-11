@@ -17,6 +17,7 @@ import featuredCategoriesRouter from "./featuredCategories/index.js";
 import usersRouter from "./users/index.js";
 import filesRouter from "./files/index.js";
 import googleStrategy from "./lib/auth/google.js";
+import ordersRouter from "./orders/index.js";
 
 const server = express();
 const port = process.env.PORT;
@@ -36,6 +37,7 @@ server.use("/categories", categoriesRouter);
 server.use("/featuredCategories", featuredCategoriesRouter);
 server.use("/users", usersRouter);
 server.use("/files", filesRouter);
+server.use("/orders", ordersRouter);
 
 // ..................ERROR HANDLERS............
 

@@ -16,6 +16,8 @@ const userSchema = new Schema(
     password: { type: String, required: false },
     role: { type: String, enum: ["User", "Admin", "Owner"], default: "User" },
     googleId: { type: String, required: false },
+    activeOrder: { type: Schema.Types.ObjectId, ref: "Order" },
+    orderHistory: [{ type: Schema.Types.ObjectId, ref: "Order" }],
   },
   { timestamps: true }
 );
