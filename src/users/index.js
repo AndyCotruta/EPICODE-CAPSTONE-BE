@@ -27,8 +27,13 @@ const usersRouter = express.Router(); //declaring the Router that connects our o
 usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const user = await UsersModel.findById(req.user._id)
-      .populate("activeOrder")
-      .populate("orderHistory");
+      .populate({
+        path: "activeOrder",
+        populate: {
+          path: "restaurantId",
+        },
+      })
+      .populate({ path: "orderHistory", populate: { path: "restaurantId" } });
 
     res.send(user);
   } catch (error) {
