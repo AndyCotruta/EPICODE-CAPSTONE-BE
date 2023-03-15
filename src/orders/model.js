@@ -10,6 +10,7 @@ export const orderSchema = new Schema(
       enum: ["active", "paid", "delivered"],
       default: "active",
     },
+    sharedOrder: { type: Boolean, default: false },
     restaurantId: {
       type: Schema.Types.ObjectId,
       ref: "Restaurant",

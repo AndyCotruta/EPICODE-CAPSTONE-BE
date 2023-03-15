@@ -185,7 +185,11 @@ usersRouter.post(
   JWTAuthMiddleware,
   async (req, res, next) => {
     try {
-      const newOrder = new OrdersModel({ ...req.body, userId: req.user._id });
+      const newOrder = new OrdersModel({
+        ...req.body,
+        userId: req.user._id,
+        sharedOrder: true,
+      });
       const newOrderObj = await newOrder.save();
       const newSharedOrder = new SharedOrderModel({
         ...req.body,
