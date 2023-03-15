@@ -13,7 +13,8 @@
     "multer-storage-cloudinary": "^4.0.0",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
-    "react-native": "^0.71.3"
+    "react-native": "^0.71.3",
+    "socket.io": "^4.6.1"
   },
   "name": "epicode-capstone-be",
   "version": "1.0.0",

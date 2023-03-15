@@ -18,6 +18,9 @@ import usersRouter from "./users/index.js";
 import filesRouter from "./files/index.js";
 import googleStrategy from "./lib/auth/google.js";
 import ordersRouter from "./orders/index.js";
+import { Server } from "socket.io";
+import { createServer } from "http";
+import { newConnectionHandler } from "./socket/index.js";
 
 const server = express();
 const port = process.env.PORT;
@@ -25,11 +28,16 @@ const port = process.env.PORT;
 passport.use("google", googleStrategy);
 
 server.use(cors());
-
 server.use(bodyParser.json({ limit: "50mb" }));
 server.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 server.use(passport.initialize());
 server.use(express.json());
+
+//...................SOCKET IO..................
+const httpServer = createServer(server);
+const io = new Server(httpServer); // new Server() expects an HTTP server, not an express server. we create this above
+
+io.on("connection", newConnectionHandler); // connection is a reserved keyword for socket
 
 server.use("/restaurants", restaurantRouter);
 server.use("/restaurants", dishesRouter);
@@ -50,7 +58,8 @@ mongoose.connect(process.env.MONGODB_URL);
 
 mongoose.connection.on("connected", () => {
   console.log("Connected to MongoDB server");
-  server.listen(port, () => {
+  httpServer.listen(port, () => {
+    // here we MUST listen with the http server!!!
     console.table(listEndpoints(server));
     console.log(`Server is listening on Port:  ${port}`);
   });
