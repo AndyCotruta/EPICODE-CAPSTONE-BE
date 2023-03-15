@@ -1,6 +1,7 @@
 import express from "express";
 import UsersModel from "./model.js";
 import OrdersModel from "../orders/model.js";
+import SharedOrderModel from "../sharedOrder/model.js";
 import passport from "passport";
 import { adminOnlyMiddleware } from "../lib/middlewares/adminOnly.js";
 import { createAccessToken } from "../lib/auth/authTools.js";
@@ -33,7 +34,8 @@ usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
           path: "restaurantId",
         },
       })
-      .populate({ path: "orderHistory", populate: { path: "restaurantId" } });
+      .populate({ path: "orderHistory", populate: { path: "restaurantId" } })
+      .populate("sharedOrder");
 
     res.send(user);
   } catch (error) {
@@ -168,6 +170,56 @@ usersRouter.post(
           createHttpError(
             404,
             `Order with id ${req.body.orderId} was not found`
+          )
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+usersRouter.post(
+  "/me/sharedOrder",
+  JWTAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const newOrder = new OrdersModel({ ...req.body, userId: req.user._id });
+      const newOrderObj = await newOrder.save();
+      const newSharedOrder = new SharedOrderModel({
+        ...req.body,
+        initiatedBy: req.user._id,
+        order: newOrderObj._id,
+      });
+      const { _id } = await newSharedOrder.save();
+      const users = req.body.users;
+      users.forEach(async (user) => {
+        const updatedUser = await UsersModel.findByIdAndUpdate(
+          user,
+          { sharedOrder: _id },
+          { new: true, runValidators: true }
+        );
+        if (updatedUser) {
+          console.log(updatedUser);
+        } else {
+          next(
+            createHttpError(404, `Participant user ${user} cannot be found `)
+          );
+        }
+      });
+      const updatedInitiatorUser = await UsersModel.findByIdAndUpdate(
+        req.user._id,
+        { sharedOrder: _id },
+        { new: true, runValidators: true }
+      );
+      if (updatedInitiatorUser) {
+        res.send(updatedInitiatorUser);
+      } else {
+        next(
+          createHttpError(
+            404,
+            `Initiator user with id ${req.user._id} cannot be found`
           )
         );
       }

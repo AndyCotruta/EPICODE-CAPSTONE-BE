@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 
 const { Schema, model } = mongoose;
 
-const orderSchema = new Schema(
+export const orderSchema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    userId: { type: Schema.Types.ObjectId, ref: "User" },
     status: {
       type: String,
       enum: ["active", "paid", "delivered"],
