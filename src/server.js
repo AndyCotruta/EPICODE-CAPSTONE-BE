@@ -35,7 +35,12 @@ server.use(express.json());
 
 //...................SOCKET IO..................
 const httpServer = createServer(server);
-const io = new Server(httpServer); // new Server() expects an HTTP server, not an express server. we create this above
+const io = new Server(httpServer, {
+  cors: {
+    origin: "http://localhost:3000",
+  },
+});
+// new Server() expects an HTTP server, not an express server. we create this above
 
 io.on("connection", newConnectionHandler); // connection is a reserved keyword for socket
 
