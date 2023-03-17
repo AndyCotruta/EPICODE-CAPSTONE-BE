@@ -280,10 +280,9 @@ usersRouter.post("/googleLogin", async (req, res, next) => {
 
 usersRouter.post("/register", cloudinaryUser, async (req, res, next) => {
   try {
-    const url = req.file.path;
     const user = await UsersModel.findOne({ email: req.body.email });
     if (!user) {
-      const newUser = new UsersModel({ ...req.body, avatar: url });
+      const newUser = new UsersModel(req.body);
       const { _id, role } = await newUser.save();
       const payload = { _id, role };
       const accessToken = await createAccessToken(payload);
