@@ -5,9 +5,15 @@ export const newConnectionHandler = (newClient) => {
     message: `Welcome to Bamboo Bites shared order!, ${newClient.id}`,
   });
 
-  // 3. Listen to sendMessage to handle the new message(data) that is sent by the client
+  // 2. Listen to sendMessage to handle the new message(data) that is sent by the client
   newClient.on("sendMessage", (message) => {
     console.log("NEW MESSAGE: ", message);
     newClient.broadcast.emit("newMessage", message);
+  });
+
+  //3. Listen to when an user disconnects from shared order screen
+  newClient.on("disconnectMe", (message) => {
+    console.log("Disconnected this user: ", message);
+    newClient.broadcast.emit("disconnectUser", message);
   });
 };
