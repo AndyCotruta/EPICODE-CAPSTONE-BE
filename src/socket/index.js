@@ -24,4 +24,16 @@ export const newConnectionHandler = (newClient) => {
     console.log("Move to shared basket message: ", message);
     newClient.broadcast.emit("moveToSharedBasket", message);
   });
+  newClient.on("addMyDish", (message) => {
+    console.log("Add my dish message: ", message);
+    newClient.broadcast.emit("addMyDish", message);
+  });
+  newClient.on("removeMyDish", (message) => {
+    console.log("Remove my dish message: ", message);
+    newClient.broadcast.emit("removeMyDish", message);
+  });
+  newClient.on("moveToDeliveryScreen", (message) => {
+    console.log("Remove my dish message: ", message);
+    newClient.broadcast.emit("moveToDeliveryScreen", message);
+  });
 };
