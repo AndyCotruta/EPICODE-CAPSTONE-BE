@@ -20,4 +20,8 @@ export const newConnectionHandler = (newClient) => {
     console.log("Waiting screen obj: ", message);
     newClient.broadcast.emit("waitingScreen", message);
   });
+  newClient.on("moveToSharedBasket", (message) => {
+    console.log("Move to shared basket message: ", message);
+    newClient.broadcast.emit("moveToSharedBasket", message);
+  });
 };
