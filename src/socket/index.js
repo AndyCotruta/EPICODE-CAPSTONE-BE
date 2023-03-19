@@ -16,4 +16,8 @@ export const newConnectionHandler = (newClient) => {
     console.log("Disconnected this user: ", message);
     newClient.broadcast.emit("disconnectUser", message);
   });
+  newClient.on("waitingScreen", (message) => {
+    console.log("Waiting screen obj: ", message);
+    newClient.broadcast.emit("waitingScreen", message);
+  });
 };
