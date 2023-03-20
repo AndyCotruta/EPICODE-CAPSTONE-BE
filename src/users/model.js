@@ -18,7 +18,7 @@ const userSchema = new Schema(
     googleId: { type: String, required: false },
     activeOrder: { type: Schema.Types.ObjectId, ref: "Order" },
     orderHistory: [{ type: Schema.Types.ObjectId, ref: "Order" }],
-    sharedOrder: [{ type: Schema.Types.ObjectId, ref: "SharedOrder" }],
+    sharedOrder: { type: Schema.Types.ObjectId, ref: "SharedOrder" },
   },
   { timestamps: true }
 );
