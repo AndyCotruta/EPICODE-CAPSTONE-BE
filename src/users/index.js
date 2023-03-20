@@ -245,6 +245,66 @@ usersRouter.post(
   }
 );
 
+usersRouter.post(
+  "/me/sharedOrderHistory",
+  JWTAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const initiatedBy = req.user._id;
+      const orderId = req.body.orderId;
+      console.log("Initiated by " + initiatedBy);
+      const deliveredOrder = await OrdersModel.findByIdAndUpdate(
+        orderId,
+        { status: "delivered" },
+        { new: true, runValidators: true }
+      );
+      console.log("Delivered order: " + deliveredOrder);
+      if (deliveredOrder) {
+        const updatedInitiatorUser = await UsersModel.findByIdAndUpdate(
+          initiatedBy,
+          { $push: { orderHistory: orderId }, sharedOrder: null },
+          { new: true, runValidators: true }
+        );
+        if (updatedInitiatorUser) {
+          const users = req.body.users;
+          users.forEach(async (user) => {
+            const updatedUser = await UsersModel.findByIdAndUpdate(
+              user,
+              { $push: { orderHistory: orderId }, sharedOrder: null },
+              { new: true, runValidators: true }
+            );
+            if (!updatedUser) {
+              next(
+                createHttpError(404, `User with id ${user} could not be found`)
+              );
+            }
+          });
+          res.send(updatedInitiatorUser);
+        } else {
+          next(
+            createHttpError(
+              404,
+              `User with id ${initiatedBy} could not be found`
+            )
+          );
+        }
+      } else {
+        next(
+          createHttpError(
+            404,
+            "An active order with id: ",
+            orderId,
+            " could not be found"
+          )
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
 //.......................................... Google Login................................
 
 usersRouter.get(
