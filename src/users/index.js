@@ -35,7 +35,18 @@ usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
         },
       })
       .populate({ path: "orderHistory", populate: { path: "restaurantId" } })
-      .populate("sharedOrder");
+      .populate({
+        path: "sharedOrder",
+        populate: { path: "order", populate: { path: "restaurantId" } },
+      })
+      .populate({
+        path: "sharedOrder",
+        populate: { path: "initiatedBy" },
+      })
+      .populate({
+        path: "sharedOrder",
+        populate: { path: "users" },
+      });
 
     res.send(user);
   } catch (error) {
