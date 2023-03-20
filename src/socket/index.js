@@ -36,4 +36,8 @@ export const newConnectionHandler = (newClient) => {
     console.log("Remove my dish message: ", message);
     newClient.broadcast.emit("moveToDeliveryScreen", message);
   });
+  newClient.on("moveSharedOrderToHistory", (message) => {
+    console.log("Move this shared order to history: ", message);
+    newClient.broadcast.emit("moveSharedOrderToHistory", message);
+  });
 };
