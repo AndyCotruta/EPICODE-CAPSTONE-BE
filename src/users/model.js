@@ -3,6 +3,16 @@ import bcrypt from "bcrypt";
 
 const { Schema, model } = mongoose;
 
+const dailyFoodSchema = new Schema(
+  {
+    type: { type: String, enum: ["recipe", "order"], required: true },
+    image: { type: String, required: true },
+    title: { type: String, required: true },
+    calories: { type: String, required: true },
+  },
+  { timestamps: true }
+);
+
 const userSchema = new Schema(
   {
     avatar: {
@@ -19,6 +29,7 @@ const userSchema = new Schema(
     activeOrder: { type: Schema.Types.ObjectId, ref: "Order" },
     orderHistory: [{ type: Schema.Types.ObjectId, ref: "Order" }],
     sharedOrder: { type: Schema.Types.ObjectId, ref: "SharedOrder" },
+    dailyFood: [dailyFoodSchema],
   },
   { timestamps: true }
 );
