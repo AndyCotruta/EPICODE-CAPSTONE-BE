@@ -250,7 +250,7 @@ usersRouter.post(
   JWTAuthMiddleware,
   async (req, res, next) => {
     try {
-      const initiatedBy = req.user._id;
+      const initiatedBy = req.body.initiatedBy;
       const orderId = req.body.orderId;
       console.log("Initiated by " + initiatedBy);
       const deliveredOrder = await OrdersModel.findByIdAndUpdate(
