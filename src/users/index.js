@@ -250,9 +250,10 @@ usersRouter.post(
   JWTAuthMiddleware,
   async (req, res, next) => {
     try {
+      const currentUser = req.user._id;
       const initiatedBy = req.body.initiatedBy;
       const orderId = req.body.orderId;
-      console.log("Initiated by " + initiatedBy);
+      const users = req.body.users;
       const deliveredOrder = await OrdersModel.findByIdAndUpdate(
         orderId,
         { status: "delivered" },
@@ -260,33 +261,37 @@ usersRouter.post(
       );
       console.log("Delivered order: " + deliveredOrder);
       if (deliveredOrder) {
-        const updatedInitiatorUser = await UsersModel.findByIdAndUpdate(
-          initiatedBy,
-          { $push: { orderHistory: orderId }, sharedOrder: null },
-          { new: true, runValidators: true }
-        );
-        if (updatedInitiatorUser) {
-          const users = req.body.users;
+        const index = users.findIndex((user) => user === currentUser);
+        if (index !== -1) {
           users.forEach(async (user) => {
             const updatedUser = await UsersModel.findByIdAndUpdate(
               user,
               { $push: { orderHistory: orderId }, sharedOrder: null },
               { new: true, runValidators: true }
             );
+            res.send(updatedUser);
             if (!updatedUser) {
               next(
                 createHttpError(404, `User with id ${user} could not be found`)
               );
             }
           });
-          res.send(updatedInitiatorUser);
         } else {
-          next(
-            createHttpError(
-              404,
-              `User with id ${initiatedBy} could not be found`
-            )
+          const updatedInitiatorUser = await UsersModel.findByIdAndUpdate(
+            initiatedBy,
+            { $push: { orderHistory: orderId }, sharedOrder: null },
+            { new: true, runValidators: true }
           );
+          if (updatedInitiatorUser) {
+            res.send(updatedInitiatorUser);
+          } else {
+            next(
+              createHttpError(
+                404,
+                `User with id ${initiatedBy} could not be found`
+              )
+            );
+          }
         }
       } else {
         next(
