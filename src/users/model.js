@@ -9,6 +9,7 @@ const dailyFoodSchema = new Schema(
     image: { type: String, required: true },
     title: { type: String, required: true },
     calories: { type: String, required: true },
+    amount: { type: Number, required: true },
   },
   { timestamps: true }
 );

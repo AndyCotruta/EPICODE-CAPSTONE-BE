@@ -305,6 +305,85 @@ usersRouter.post(
   }
 );
 
+usersRouter.post(
+  "/me/dailyFood/",
+  JWTAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const userId = req.user._id;
+      const updatedUser = await UsersModel.findByIdAndUpdate(
+        userId,
+        { $push: { dailyFood: req.body } },
+        { new: true, runValidators: true }
+      );
+      if (updatedUser) {
+        res.send(updatedUser);
+      } else {
+        next(createHttpError(404, `User with id ${userId} was not found`));
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+usersRouter.put(
+  "/me/dailyFood/:dailyFoodId",
+  JWTAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const userId = req.user._id;
+      const foodId = req.params.dailyFoodId;
+      const user = await UsersModel.findById(userId);
+      if (user) {
+        const index = user.dailyFood.findIndex(
+          (food) => food._id.toString() === foodId.toString()
+        );
+        if (index !== -1) {
+          user.dailyFood[index] = {
+            ...user.dailyFood[index].toObject(),
+            ...req.body,
+          };
+          await user.save();
+          res.send(user);
+        } else {
+          next(createHttpError(404, `Daily food with id ${foodId} not found`));
+        }
+      } else {
+        next(createHttpError(404, `User with id ${userId} not found`));
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+usersRouter.delete(
+  "/me/dailyFood/:dailyFoodId",
+  JWTAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const userId = req.user._id;
+      const foodId = req.params.dailyFoodId;
+      const updatedUser = await UsersModel.findByIdAndUpdate(
+        userId,
+        { $pull: { dailyFood: { _id: foodId } } },
+        { new: true }
+      );
+      if (updatedUser) {
+        res.send(updatedUser);
+      } else {
+        next(createHttpError(404, `User with id ${userId} not found`));
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
 //.......................................... Google Login................................
 
 usersRouter.get(
